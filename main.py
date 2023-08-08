@@ -1,5 +1,4 @@
 import sys
-import mysql.connector
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton,QVBoxLayout,QHBoxLayout, QGridLayout, QLabel, QWidget, QLineEdit, QFrame
 from root import Error, Connect
 
@@ -47,7 +46,6 @@ class Login(QMainWindow):
         global usernstring
         usernstring = self.usern
 
-        self.createDatabase = CreateDatabase(self)
 
     def submit(self):
         try:
@@ -124,11 +122,12 @@ class MainPage(QMainWindow):
         self.w.show()
 
 class CreateDatabase(QWidget):
-    def __init__(self, other_class):
-        super(CreateDatabase, self).__init__()
+    def __init__(self):
+        super().__init__()
 
-        self.other_class = other_class
-
+        a = Login()
+        self.c = a.usern.text()
+        self.b = a.passw.text()
         self.setWindowTitle("MDC")
         self.layout = QGridLayout()
         self.enterl = QLabel("Enter Database Name")
@@ -149,15 +148,10 @@ class CreateDatabase(QWidget):
         self.setFixedHeight(105)
         self.setFixedWidth(200)
 
-        usern = other_class.usern.text()
-        passw = other_class.passw.text()
         
     def databaseCreate(self,checked):
         if (self.entert.text()).isalpha():
-            mydb = Connect.getConnection(usern, passw)
-            myc = mydb.cursor()
-
-            myc.execute("CREATE DATABASE " + self.entert.text())
+            print(self.c + self.b)
         else:
             labele = QLabel("DB name is not alpha")
             labele.setStyleSheet("color: red;")
@@ -260,6 +254,7 @@ class Search(QWidget):
 app = QApplication(sys.argv)
 
 window = Login()
+
 with open("styles.css","r") as file:
     app.setStyleSheet(file.read())
 window.show()

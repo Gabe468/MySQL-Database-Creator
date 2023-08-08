@@ -7,3 +7,11 @@ class Connect():
         user = usern ,
         password = passw
         )
+        
+    def getConnection(usern, passw):
+        connector = mysql.connector.connect(
+        host="localhost",
+        user = usern ,
+        password = passw
+        )
+        return connector

@@ -18,9 +18,9 @@ class Login(QMainWindow):
         #Username text and box
         self.labelu = QLabel("Username:")
         self.layout.addWidget(self.labelu, 1, 0)
-        self.usern = QLineEdit()
-        self.usern.setFixedWidth(100)
-        self.layout.addWidget(self.usern, 1, 1)
+        usern = QLineEdit()
+        usern.setFixedWidth(100)
+        self.layout.addWidget(usern, 1, 1)
 
         #Password text and box
         labelp = QLabel("Password:")
@@ -44,12 +44,12 @@ class Login(QMainWindow):
         self.setFixedWidth(300)
 
         global usernstring
-        usernstring = self.usern
+        usernstring = usern
 
 
     def submit(self):
         try:
-            Connect.connection(self.usern.text(), self.passw.text())
+            Connect.connection(usern.text(), self.passw.text())
             self.close()
             self.window = MainPage()
             self.window.show()
@@ -66,6 +66,7 @@ class MainPage(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        a = Login()
 
         self.resize(600, 600)
         self.setFixedHeight(900)
@@ -73,7 +74,7 @@ class MainPage(QMainWindow):
         self.setWindowTitle("MDC")
 
         self.Body = QGridLayout()
-        labelp = QLabel("Hello "+ (usernstring.text()).upper())
+        labelp = QLabel("Hello "+ (a.usern.text()).upper())
         self.Body.addWidget(labelp, 0, 0)
 
         self.createdd = QPushButton("Create Database")

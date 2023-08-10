@@ -1,6 +1,6 @@
 import sys
 import mysql.connector
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton,QVBoxLayout,QHBoxLayout, QGridLayout, QLabel, QWidget, QLineEdit, QFrame
+from PyQt6.QtWidgets import QDialog, QApplication, QMainWindow, QPushButton,QVBoxLayout,QHBoxLayout, QGridLayout, QLabel, QWidget, QLineEdit, QFrame
 from root import Error, Connect
 
 
@@ -44,16 +44,13 @@ class Login(QMainWindow):
         self.setFixedHeight(130)
         self.setFixedWidth(300)
 
-        global usernstring
-        usernstring = self.usern
 
-        self.createDatabase = CreateDatabase(self)
 
     def submit(self):
         try:
             Connect.connection(self.usern.text(), self.passw.text())
             self.close()
-            self.window = MainPage()
+            self.window = MainPage(self.usern, self.passw)
             self.window.show()
 
         except Error as e:
@@ -66,16 +63,17 @@ class Login(QMainWindow):
     
 class MainPage(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, usern, passw):
         super().__init__()
-
+        self.usern = usern
+        self.passw = passw
         self.resize(600, 600)
         self.setFixedHeight(900)
         self.setFixedWidth(900)
         self.setWindowTitle("MDC")
 
         self.Body = QGridLayout()
-        labelp = QLabel("Hello "+ (usernstring.text()).upper())
+        labelp = QLabel("Hello "+ (self.usern.text()).upper())
         self.Body.addWidget(labelp, 0, 0)
 
         self.createdd = QPushButton("Create Database")
@@ -104,7 +102,7 @@ class MainPage(QMainWindow):
 
 
     def cDatabase(self, checked):
-        self.w = CreateDatabase()
+        self.w = CreateDatabase(self.usern, self.passw)
         self.w.show()
 
     def dDatabase(self, checked):
@@ -123,12 +121,11 @@ class MainPage(QMainWindow):
         self.w = Search()
         self.w.show()
 
-class CreateDatabase(QWidget):
-    def __init__(self, other_class):
-        super(CreateDatabase, self).__init__()
-
-        self.other_class = other_class
-
+class CreateDatabase(QDialog):
+    def __init__(self, usern, passw):
+        super().__init__()
+        self.usern = usern
+        self.passw = passw
         self.setWindowTitle("MDC")
         self.layout = QGridLayout()
         self.enterl = QLabel("Enter Database Name")
@@ -148,18 +145,15 @@ class CreateDatabase(QWidget):
         self.enterl.setFixedWidth(150)
         self.setFixedHeight(105)
         self.setFixedWidth(200)
-
-        usern = other_class.usern.text()
-        passw = other_class.passw.text()
         
     def databaseCreate(self,checked):
-        if (self.entert.text()).isalpha():
-            mydb = Connect.getConnection(usern, passw)
-            myc = mydb.cursor()
+        try:
+                mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+                myc = mydb.cursor()
 
-            myc.execute("CREATE DATABASE " + self.entert.text())
-        else:
-            labele = QLabel("DB name is not alpha")
+                myc.execute("CREATE DATABASE " + self.entert.text())
+        except Error as err:
+            labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
             self.layout.addWidget(labele, 2, 0)
             self.setFixedHeight(130)

@@ -76,13 +76,16 @@ class   SelectDatabase(QMainWindow):
         labelp = QLabel("Hello "+ (self.usern.text()).upper())
         self.Body.addWidget(labelp, 0, 0)
 
-        self.createdd = QPushButton("Create Database")
-        self.Body.addWidget(self.createdd, 1, 0)
-        self.createdd.clicked.connect(self.cDatabase)
+        self.created = QPushButton("Create Database")
+        self.Body.addWidget(self.created, 1, 0)
+        self.created.clicked.connect(self.cDatabase)
 
         self.deleted = QPushButton("Delete Database")
         self.Body.addWidget(self.deleted, 1, 1)
         self.deleted.clicked.connect(self.dDatabase)
+
+        self.selected = QLabel("Select Database:")
+        self.Body.addWidget(self.selected, 2, 0)
 
         widget1 = QWidget()
         widget1.setLayout(self.Body)

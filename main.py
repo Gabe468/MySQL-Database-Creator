@@ -24,8 +24,8 @@ class Login(QMainWindow):
         self.layout.addWidget(self.usern, 1, 1)
 
         #Password text and box
-        labelp = QLabel("Password:")
-        self.layout.addWidget(labelp,2,0)
+        self.labelp = QLabel("Password:")
+        self.layout.addWidget(self.labelp,2,0)
         self.passw = QLineEdit()
         self.passw.setEchoMode(QLineEdit.EchoMode.Password)
         self.layout.addWidget(self.passw, 2, 1)
@@ -73,8 +73,8 @@ class   SelectDatabase(QMainWindow):
         self.setWindowTitle("MDC")
 
         self.Body = QGridLayout()
-        labelp = QLabel("Hello "+ (self.usern.text()).upper())
-        self.Body.addWidget(labelp, 0, 0)
+        self.labelp = QLabel("Hello "+ (self.usern.text()).upper())
+        self.Body.addWidget(self.labelp, 0, 0)
 
         self.created = QPushButton("Create Database")
         self.Body.addWidget(self.created, 1, 0)
@@ -87,27 +87,36 @@ class   SelectDatabase(QMainWindow):
         self.selected = QLabel("Select Database:")
         self.Body.addWidget(self.selected, 2, 0)
 
+        self.dSelection = QVBoxLayout()
+        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+        myc = mydb.cursor()
+        databases = ("SHOW SCHEMAS")
+        myc.execute(databases)
+        for databases in myc:
+            print(databases)
+
         widget1 = QWidget()
         widget1.setLayout(self.Body)
         self.setMenuWidget(widget1)
 
 
-    def cDatabase(self, checked):
+    def cDatabase(self):
         self.w = CreateDatabase(self.usern, self.passw)
         self.w.show()
 
-    def dDatabase(self, checked):
+    def dDatabase(self):
         self.w = DeleteDatabase(self.usern, self.passw)
         self.w.show()
 
-class CreateDatabase(QDialog):
+
+class CreateDatabase(QWidget):
     def __init__(self, usern, passw):
         super().__init__()
         self.usern = usern
         self.passw = passw
-        self.setWindowTitle("MDC")
+        self.setWindowTitle("Create Database")
         self.layout = QGridLayout()
-        self.enterl = QLabel("Enter Database Name")
+        self.enterl = QLabel(" Enter Database Name To Create")
         
 
         self.entert = QLineEdit()
@@ -121,9 +130,10 @@ class CreateDatabase(QDialog):
         self.layout.addWidget(self.enterb, 3, 0)
         self.setLayout(self.layout)
 
-        self.enterl.setFixedWidth(150)
-        self.setFixedHeight(105)
-        self.setFixedWidth(200)
+        self.entert.setFixedWidth(230)
+        self.enterl.setFixedWidth(250)
+        self.setFixedHeight(120)
+        self.setFixedWidth(250)
         
     def databaseCreate(self,checked):
         try:
@@ -146,7 +156,7 @@ class DeleteDatabase(QDialog):
         super().__init__()
         self.usern = usern
         self.passw = passw
-        self.setWindowTitle("MDC")
+        self.setWindowTitle("Delete Database")
         layout = QGridLayout()
         self.enterl = QLabel("Enter Database Name")
         

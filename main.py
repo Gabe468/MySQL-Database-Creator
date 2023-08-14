@@ -88,17 +88,23 @@ class   SelectDatabase(QMainWindow):
         self.Body.addWidget(self.selected, 2, 0)
 
         self.dSelection = QVBoxLayout()
-        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
-        myc = mydb.cursor()
-        databases = ("SHOW SCHEMAS")
-        myc.execute(databases)
-        for databases in myc:
-            print(databases)
+        SelectDatabase.listDatabase(self)
 
         widget1 = QWidget()
         widget1.setLayout(self.Body)
         self.setMenuWidget(widget1)
 
+    def listDatabase(self):
+        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+        myc = mydb.cursor()
+        databases = ("SHOW SCHEMAS")
+        myc.execute(databases)
+        x = 3
+        for databases in myc:
+            databases = str(databases).strip("',()")
+            self.databases = QPushButton(str(databases))
+            self.Body.addWidget(self.databases, x, 0)
+            x+=1
 
     def cDatabase(self):
         self.w = CreateDatabase(self.usern, self.passw)
@@ -141,7 +147,9 @@ class CreateDatabase(QWidget):
                 myc = mydb.cursor()
 
                 myc.execute("CREATE DATABASE " + self.entert.text())
-                
+                self.close()
+                SelectDatabase(self.usern, self.passw).hide()
+                SelectDatabase(self.usern, self.passw).show()
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")

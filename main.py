@@ -50,8 +50,9 @@ class Login(QMainWindow):
         try:
             Connect.connection(self.usern.text(), self.passw.text())
             self.close()
-            self.window = SelectDatabase(self.usern, self.passw)
-            self.window.show()
+            self.w = SelectDatabase(self.usern, self.passw)
+            self.w.show()
+
 
         except Error as e:
             labele = QLabel(str(e))
@@ -105,6 +106,8 @@ class   SelectDatabase(QMainWindow):
             self.databases = QPushButton(str(databases))
             self.Body.addWidget(self.databases, x, 0)
             x+=1
+            self.databases.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
+                                        "QPushButton:hover { background-color: #818181 }")
 
     def cDatabase(self):
         self.w = CreateDatabase(self.usern, self.passw)
@@ -124,7 +127,6 @@ class CreateDatabase(QWidget):
         self.layout = QGridLayout()
         self.enterl = QLabel(" Enter Database Name To Create")
         
-
         self.entert = QLineEdit()
         self.entert.setFixedWidth(150)
 
@@ -141,22 +143,19 @@ class CreateDatabase(QWidget):
         self.setFixedHeight(120)
         self.setFixedWidth(250)
         
-    def databaseCreate(self,checked):
+    def databaseCreate(self):
         try:
                 mydb = Connect.getConnection(self.usern.text(), self.passw.text())
                 myc = mydb.cursor()
 
                 myc.execute("CREATE DATABASE " + self.entert.text())
                 self.close()
-                SelectDatabase(self.usern, self.passw).hide()
-                SelectDatabase(self.usern, self.passw).show()
+                Login
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
             self.layout.addWidget(labele, 2, 0)
             self.setFixedHeight(130)
-
-
 
 
 class DeleteDatabase(QDialog):
@@ -184,7 +183,7 @@ class DeleteDatabase(QDialog):
         self.setFixedHeight(105)
         self.setFixedWidth(200)
 
-    def databaseDelete(self,checked):
+    def databaseDelete(self):
         try:
                 mydb = Connect.getConnection(self.usern.text(), self.passw.text())
                 myc = mydb.cursor()

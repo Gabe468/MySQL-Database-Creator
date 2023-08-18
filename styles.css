@@ -15,10 +15,6 @@ QPushButton:hover
 {
     background-color: #818181;
 }
-QPushButton#databases:hover
-{
-    background-color: #9b0d0d;
-}
 QLineEdit {
     background-color: "white";
     color: "black";

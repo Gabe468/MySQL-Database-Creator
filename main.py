@@ -50,8 +50,7 @@ class Login(QMainWindow):
         try:
             Connect.connection(self.usern.text(), self.passw.text())
             self.close()
-            self.w = SelectDatabase(self.usern, self.passw)
-            self.w.show()
+            SelectDatabase.openWindow(self)
 
 
         except Error as e:
@@ -62,8 +61,7 @@ class Login(QMainWindow):
 
 
     
-class   SelectDatabase(QMainWindow):
-
+class   SelectDatabase(QWidget):
     def __init__(self, usern, passw):
         super().__init__()
         self.usern = usern
@@ -91,9 +89,11 @@ class   SelectDatabase(QMainWindow):
         self.dSelection = QVBoxLayout()
         SelectDatabase.listDatabase(self)
 
-        widget1 = QWidget()
-        widget1.setLayout(self.Body)
-        self.setMenuWidget(widget1)
+        self.setLayout(self.Body)
+
+    def openWindow(self):
+        self.win = SelectDatabase(self.usern, self.passw)
+        self.win.show()
 
     def listDatabase(self):
         mydb = Connect.getConnection(self.usern.text(), self.passw.text())
@@ -104,17 +104,23 @@ class   SelectDatabase(QMainWindow):
         for databases in myc:
             databases = str(databases).strip("',()")
             self.databases = QPushButton(str(databases))
+            self.databases.clicked.connect(self.showTables)
             self.Body.addWidget(self.databases, x, 0)
             x+=1
             self.databases.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
                                         "QPushButton:hover { background-color: #818181 }")
-
     def cDatabase(self):
+        self.close()
         self.w = CreateDatabase(self.usern, self.passw)
         self.w.show()
 
     def dDatabase(self):
+        self.close()
         self.w = DeleteDatabase(self.usern, self.passw)
+        self.w.show()
+
+    def showTables(self):
+        self.w = SelectTable(self.usern, self.passw)
         self.w.show()
 
 
@@ -150,7 +156,7 @@ class CreateDatabase(QWidget):
 
                 myc.execute("CREATE DATABASE " + self.entert.text())
                 self.close()
-                Login
+                SelectDatabase.openWindow(self)
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
@@ -164,7 +170,7 @@ class DeleteDatabase(QDialog):
         self.usern = usern
         self.passw = passw
         self.setWindowTitle("Delete Database")
-        layout = QGridLayout()
+        self.layout = QGridLayout()
         self.enterl = QLabel("Enter Database Name")
         
 
@@ -174,10 +180,10 @@ class DeleteDatabase(QDialog):
         self.enterb = QPushButton("Enter")
         self.enterb.clicked.connect(self.databaseDelete)
 
-        layout.addWidget(self.enterl)
-        layout.addWidget(self.entert)
-        layout.addWidget(self.enterb)
-        self.setLayout(layout)
+        self.layout.addWidget(self.enterl, 0, 0)
+        self.layout.addWidget(self.entert, 1, 0)
+        self.layout.addWidget(self.enterb, 3, 0)
+        self.setLayout(self.layout)
 
         self.enterl.setFixedWidth(150)
         self.setFixedHeight(105)
@@ -189,11 +195,58 @@ class DeleteDatabase(QDialog):
                 myc = mydb.cursor()
 
                 myc.execute("DROP DATABASE " + self.entert.text())
+                self.close()
+                SelectDatabase.openWindow(self)
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
             self.layout.addWidget(labele, 2, 0)
             self.setFixedHeight(130)
+
+class SelectTable(QWidget):
+    def __init__(self, usern, passw):
+        super().__init__()
+        self.usern = usern
+        self.passw = passw
+        self.resize(600, 600)
+        self.setFixedHeight(500)
+        self.setFixedWidth(300)
+        self.setWindowTitle("MDC")
+
+        self.Body = QGridLayout()
+        self.labelp = QLabel("Hello "+ (self.usern.text()).upper())
+        self.Body.addWidget(self.labelp, 0, 0)
+
+        self.createt = QPushButton("Create Table")
+        self.Body.addWidget(self.createt, 1, 0)
+
+
+        self.deletet = QPushButton("Delete Table")
+        self.Body.addWidget(self.deletet, 1, 1)
+
+
+        self.selected = QLabel("Select Database:")
+        self.Body.addWidget(self.selected, 2, 0)
+
+        self.dSelection = QVBoxLayout()
+
+        self.setLayout(self.Body)
+        
+    def listDatabase(self):
+        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+        myc = mydb.cursor()
+        databases = ("USE database_name SHOW TABLES;")
+        myc.execute(databases)
+        x = 3
+        for databases in myc:
+            databases = str(databases).strip("',()")
+            self.databases = QPushButton(str(databases))
+            self.databases.clicked.connect(self.showTables)
+            self.Body.addWidget(self.databases, x, 0)
+            x+=1
+            self.databases.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
+                                        "QPushButton:hover { background-color: #818181 }")
+
 
 class CreateTable(QWidget):
     def __init__(self):

@@ -88,6 +88,7 @@ class   SelectDatabase(QWidget):
 
         self.dSelection = QVBoxLayout()
         SelectDatabase.listDatabase(self)
+        SelectDatabase.database = ""
 
         self.setLayout(self.Body)
 
@@ -122,6 +123,7 @@ class   SelectDatabase(QWidget):
     def showTables(self):
         self.w = SelectTable(self.usern, self.passw)
         self.w.show()
+        SelectDatabase.database = self.databases.text()
 
 
 class CreateDatabase(QWidget):
@@ -225,23 +227,22 @@ class SelectTable(QWidget):
         self.Body.addWidget(self.deletet, 1, 1)
 
 
-        self.selected = QLabel("Select Database:")
+        self.selected = QLabel("Select Table:")
         self.Body.addWidget(self.selected, 2, 0)
 
         self.dSelection = QVBoxLayout()
-
+        SelectTable.listTable(self)
         self.setLayout(self.Body)
         
-    def listDatabase(self):
+    def listTable(self):
         mydb = Connect.getConnection(self.usern.text(), self.passw.text())
         myc = mydb.cursor()
-        databases = ("USE database_name SHOW TABLES;")
+        databases = ("USE "+ SelectDatabase(self.usern, self.passw).database  + " SHOW TABLES;")
         myc.execute(databases)
-        x = 3
+        x = 0
         for databases in myc:
             databases = str(databases).strip("',()")
             self.databases = QPushButton(str(databases))
-            self.databases.clicked.connect(self.showTables)
             self.Body.addWidget(self.databases, x, 0)
             x+=1
             self.databases.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"

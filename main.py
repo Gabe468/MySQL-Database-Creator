@@ -88,7 +88,7 @@ class   SelectDatabase(QWidget):
 
         self.dSelection = QVBoxLayout()
         SelectDatabase.listDatabase(self)
-        SelectDatabase.database = ""
+
 
         self.setLayout(self.Body)
 
@@ -105,6 +105,8 @@ class   SelectDatabase(QWidget):
         for databases in myc:
             databases = str(databases).strip("',()")
             self.databases = QPushButton(str(databases))
+            text = self.databases.text()
+            self.databases.clicked.connect(lambda c, text=text : SelectTable.getTable(text))
             self.databases.clicked.connect(self.showTables)
             self.Body.addWidget(self.databases, x, 0)
             x+=1
@@ -123,8 +125,6 @@ class   SelectDatabase(QWidget):
     def showTables(self):
         self.w = SelectTable(self.usern, self.passw)
         self.w.show()
-        SelectDatabase.database = self.databases.text()
-
 
 class CreateDatabase(QWidget):
     def __init__(self, usern, passw):
@@ -231,23 +231,17 @@ class SelectTable(QWidget):
         self.Body.addWidget(self.selected, 2, 0)
 
         self.dSelection = QVBoxLayout()
-        SelectTable.listTable(self)
         self.setLayout(self.Body)
-        
-    def listTable(self):
-        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
-        myc = mydb.cursor()
-        databases = ("USE "+ SelectDatabase(self.usern, self.passw).database  + " SHOW TABLES;")
-        myc.execute(databases)
-        x = 0
-        for databases in myc:
-            databases = str(databases).strip("',()")
-            self.databases = QPushButton(str(databases))
-            self.Body.addWidget(self.databases, x, 0)
-            x+=1
-            self.databases.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
-                                        "QPushButton:hover { background-color: #818181 }")
+        SelectTable.listTable(self)
+    
+    def getTable(text):
+        SelectTable.getTable.text = text
 
+    def listTable(self):
+        databases = str(SelectTable.getTable.text).strip("',()")
+        self.databases = QPushButton(str(databases))
+        self.Body.addWidget(self.databases, 3, 0)
+    
 
 class CreateTable(QWidget):
     def __init__(self):

@@ -106,7 +106,7 @@ class   SelectDatabase(QWidget):
             databases = str(databases).strip("',()")
             self.databases = QPushButton(str(databases))
             text = self.databases.text()
-            self.databases.clicked.connect(lambda c, text=text : SelectTable.getTable(text))
+            self.databases.clicked.connect(lambda c, text=text : SelectTable.getDatabase(text))
             self.databases.clicked.connect(self.showTables)
             self.Body.addWidget(self.databases, x, 0)
             x+=1
@@ -126,15 +126,16 @@ class   SelectDatabase(QWidget):
         self.w = SelectTable(self.usern, self.passw)
         self.w.show()
 
-class CreateDatabase(QWidget):
+class CreateDatabase(QDialog):
     def __init__(self, usern, passw):
         super().__init__()
         self.usern = usern
         self.passw = passw
         self.setWindowTitle("Create Database")
         self.layout = QGridLayout()
-        self.enterl = QLabel(" Enter Database Name To Create")
+        self.enterl = QLabel("Enter Database Name To Create")
         
+
         self.entert = QLineEdit()
         self.entert.setFixedWidth(150)
 
@@ -146,10 +147,10 @@ class CreateDatabase(QWidget):
         self.layout.addWidget(self.enterb, 3, 0)
         self.setLayout(self.layout)
 
-        self.entert.setFixedWidth(230)
-        self.enterl.setFixedWidth(250)
-        self.setFixedHeight(120)
-        self.setFixedWidth(250)
+        self.enterl.setFixedWidth(150)
+        self.setFixedHeight(105)
+        self.setFixedWidth(200)
+
         
     def databaseCreate(self):
         try:
@@ -234,13 +235,22 @@ class SelectTable(QWidget):
         self.setLayout(self.Body)
         SelectTable.listTable(self)
     
-    def getTable(text):
-        SelectTable.getTable.text = text
+    def getDatabase(text):
+        SelectTable.getDatabase.text = text
 
     def listTable(self):
-        databases = str(SelectTable.getTable.text).strip("',()")
-        self.databases = QPushButton(str(databases))
-        self.Body.addWidget(self.databases, 3, 0)
+        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+        myc = mydb.cursor()
+        myc.execute("USE "+ SelectTable.getDatabase.text)
+        myc.execute("SHOW TABLES")
+        x=3
+        for tables in myc:
+            tables = str(tables).strip("',()")
+            self.tables = QPushButton(tables)
+            self.Body.addWidget(self.tables, x, 0)
+            x+=1
+            self.tables.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
+                                        "QPushButton:hover { background-color: #818181 }")
     
 
 class CreateTable(QWidget):

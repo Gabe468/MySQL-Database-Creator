@@ -1,3 +1,1 @@
-Make selection table refresh when creating or deleting database
-show information inside Table
-add search and filter option
+Import csv to tables and view data **LAST STEP

@@ -1,6 +1,8 @@
 import sys
 import mysql.connector
-from PyQt6.QtWidgets import QDialog, QApplication, QMainWindow, QPushButton,QVBoxLayout,QHBoxLayout, QGridLayout, QLabel, QWidget, QLineEdit, QFrame
+from PyQt6 import QtCore
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QTableView, QDialog, QApplication, QMainWindow, QPushButton,QVBoxLayout,QHBoxLayout, QGridLayout, QLabel, QWidget, QLineEdit, QFrame
 from root import Error, Connect
 
 
@@ -247,10 +249,17 @@ class SelectTable(QWidget):
         for tables in myc:
             tables = str(tables).strip("',()")
             self.tables = QPushButton(tables)
+            text = self.tables.text()
+            self.tables.clicked.connect(lambda c, text=text : ViewTable.getTable(text))
+            self.tables.clicked.connect(self.showData)
             self.Body.addWidget(self.tables, x, 0)
             x+=1
             self.tables.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
                                         "QPushButton:hover { background-color: #818181 }")
+    
+    def showData(self):
+        self.w = ViewTable(self.usern, self.passw)
+        self.w.show()
     
 
 class CreateTable(QWidget):
@@ -297,27 +306,67 @@ class DropTable(QWidget):
         self.setFixedHeight(105)
         self.setFixedWidth(200)
 
-class Search(QWidget):
-    def __init__(self):
+class ViewTable(QWidget):
+    def __init__(self, usern, passw):
         super().__init__()
+        self.usern = usern
+        self.passw = passw
+        self.resize(600, 600)
+        self.setFixedHeight(500)
+        self.setFixedWidth(300)
         self.setWindowTitle("MDC")
-        layout = QGridLayout()
-        self.enterl = QLabel(" Search name")
-        
 
-        self.entert = QLineEdit()
-        self.entert.setFixedWidth(130)
+        self.Body = QGridLayout()
+        self.labelp = QLabel("Hello "+ (self.usern.text()).upper())
+        self.Body.addWidget(self.labelp, 0, 0)
 
-        self.enterb = QPushButton("Enter")
+        self.dSelection = QVBoxLayout()
+        self.setLayout(self.Body)
+        ViewTable.listData(self)
+    
 
-        layout.addWidget(self.enterl)
-        layout.addWidget(self.entert)
-        layout.addWidget(self.enterb)
-        self.setLayout(layout)
+        self.table = QTableView()
 
-        self.enterl.setFixedWidth(130)
-        self.setFixedHeight(105)
-        self.setFixedWidth(200)
+        data = [
+            [4, 9, 2],
+            [1, 0, 0],
+            [3, 5, 0],
+            [3, 3, 2],
+            [7, 8, 9],
+        ]
+        self.model = TableModel(data)
+        self.table.setModel(self.model)
+
+        self.Body.addWidget(self.table, 1, 0)
+    def getTable(text):
+        ViewTable.getTable.text = text
+
+    def listData(self):
+        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+        myc = mydb.cursor()
+        myc.execute("USE "+ SelectTable.getDatabase.text)
+        myc.execute("SELECT * FROM " + ViewTable.getTable.text)
+        ViewTable.listData.tables = len(myc.description)
+        field_names = [i[0] for i in myc.description]
+        print(field_names)
+
+class TableModel(QtCore.QAbstractTableModel):
+    def __init__(self, data):
+        super(TableModel, self).__init__()
+        self._data = data
+
+    def data(self, index, role):
+        if role == Qt.ItemDataRole.DisplayRole:
+            # See below for the nested-list data structure.
+            # .row() indexes into the outer list,
+            # .column() indexes into the sub-list
+            return self._data[index.row()][index.column()]
+
+    def rowCount(self, index):
+        return len(self._data)
+
+    def columnCount(self, index):
+        return ViewTable.listData.tables
 
 
 app = QApplication(sys.argv)

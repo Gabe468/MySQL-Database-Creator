@@ -50,7 +50,9 @@ class Login(QMainWindow):
 
     def submit(self):
         try:
-            Connect.connection(self.usern.text(), self.passw.text())
+            Login.usern = self.usern.text()
+            Login.passw = self.passw.text()
+            Connect.connection(Login.usern, Login.passw)
             self.close()
             SelectDatabase.openWindow(self)
 
@@ -64,17 +66,16 @@ class Login(QMainWindow):
 
     
 class   SelectDatabase(QWidget):
-    def __init__(self, usern, passw):
+    def __init__(self):
         super().__init__()
-        self.usern = usern
-        self.passw = passw
+
         self.resize(600, 600)
         self.setFixedHeight(500)
         self.setFixedWidth(300)
         self.setWindowTitle("MDC")
 
         self.Body = QGridLayout()
-        self.labelp = QLabel("Hello "+ (self.usern.text()).upper())
+        self.labelp = QLabel("Hello "+ (Login.usern).upper())
         self.Body.addWidget(self.labelp, 0, 0)
 
         self.created = QPushButton("Create Database")
@@ -95,11 +96,11 @@ class   SelectDatabase(QWidget):
         self.setLayout(self.Body)
 
     def openWindow(self):
-        self.win = SelectDatabase(self.usern, self.passw)
+        self.win = SelectDatabase()
         self.win.show()
 
     def listDatabase(self):
-        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+        mydb = Connect.getConnection(Login.usern, Login.passw)
         myc = mydb.cursor()
         databases = ("SHOW SCHEMAS")
         myc.execute(databases)
@@ -116,23 +117,23 @@ class   SelectDatabase(QWidget):
                                         "QPushButton:hover { background-color: #818181 }")
     def cDatabase(self):
         self.close()
-        self.w = CreateDatabase(self.usern, self.passw)
+        self.w = CreateDatabase()
         self.w.show()
 
     def dDatabase(self):
         self.close()
-        self.w = DeleteDatabase(self.usern, self.passw)
+        self.w = DeleteDatabase()
         self.w.show()
 
     def showTables(self):
-        self.w = SelectTable(self.usern, self.passw)
+        self.close()
+        self.w = SelectTable()
         self.w.show()
 
 class CreateDatabase(QDialog):
-    def __init__(self, usern, passw):
+    def __init__(self):
         super().__init__()
-        self.usern = usern
-        self.passw = passw
+
         self.setWindowTitle("Create Database")
         self.layout = QGridLayout()
         self.enterl = QLabel("Enter Database Name To Create")
@@ -156,7 +157,7 @@ class CreateDatabase(QDialog):
         
     def databaseCreate(self):
         try:
-                mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+                mydb = Connect.getConnection(Login.usern, Login.usern)
                 myc = mydb.cursor()
 
                 myc.execute("CREATE DATABASE " + self.entert.text())
@@ -170,10 +171,9 @@ class CreateDatabase(QDialog):
 
 
 class DeleteDatabase(QDialog):
-    def __init__(self, usern, passw):
+    def __init__(self):
         super().__init__()
-        self.usern = usern
-        self.passw = passw
+
         self.setWindowTitle("Delete Database")
         self.layout = QGridLayout()
         self.enterl = QLabel("Enter Database Name")
@@ -196,7 +196,7 @@ class DeleteDatabase(QDialog):
 
     def databaseDelete(self):
         try:
-                mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+                mydb = Connect.getConnection(Login.usern, Login.usern)
                 myc = mydb.cursor()
 
                 myc.execute("DROP DATABASE " + self.entert.text())
@@ -209,26 +209,25 @@ class DeleteDatabase(QDialog):
             self.setFixedHeight(130)
 
 class SelectTable(QWidget):
-    def __init__(self, usern, passw):
+    def __init__(self):
         super().__init__()
-        self.usern = usern
-        self.passw = passw
+
         self.resize(600, 600)
         self.setFixedHeight(500)
         self.setFixedWidth(300)
         self.setWindowTitle("MDC")
 
         self.Body = QGridLayout()
-        self.labelp = QLabel("Hello "+ (self.usern.text()).upper())
+        self.labelp = QLabel("Hello "+ (Login.usern).upper())
         self.Body.addWidget(self.labelp, 0, 0)
 
         self.createt = QPushButton("Create Table")
         self.Body.addWidget(self.createt, 1, 0)
-
+        self.createt.clicked.connect(self.cTable)
 
         self.deletet = QPushButton("Delete Table")
         self.Body.addWidget(self.deletet, 1, 1)
-
+        self.deletet.clicked.connect(self.dTable)
 
         self.selected = QLabel("Select Table:")
         self.Body.addWidget(self.selected, 2, 0)
@@ -241,7 +240,7 @@ class SelectTable(QWidget):
         SelectTable.getDatabase.text = text
 
     def listTable(self):
-        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+        mydb = Connect.getConnection(Login.usern, Login.passw)
         myc = mydb.cursor()
         myc.execute("USE "+ SelectTable.getDatabase.text)
         myc.execute("SHOW TABLES")
@@ -258,14 +257,25 @@ class SelectTable(QWidget):
                                         "QPushButton:hover { background-color: #818181 }")
     
     def showData(self):
-        self.w = ViewTable(self.usern, self.passw)
+        self.close()
+        self.w = ViewTable()
+        self.w.show()
+    
+    def cTable(self):
+        self.close()
+        self.w = CreateTable()
+        self.w.show()
+
+    def dTable(self):
+        self.close()
+        self.w = DropTable()
         self.w.show()
     
 
 class CreateTable(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("MDC")
+        self.setWindowTitle("Create Table")
         layout = QGridLayout()
         self.enterl = QLabel(" Enter Table Name")
         
@@ -274,7 +284,7 @@ class CreateTable(QWidget):
         self.entert.setFixedWidth(130)
 
         self.enterb = QPushButton("Enter")
-
+        
         layout.addWidget(self.enterl)
         layout.addWidget(self.entert)
         layout.addWidget(self.enterb)
@@ -287,7 +297,7 @@ class CreateTable(QWidget):
 class DropTable(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("MDC")
+        self.setWindowTitle("Drop Table")
         layout = QGridLayout()
         self.enterl = QLabel(" Enter Table Name")
         
@@ -296,6 +306,7 @@ class DropTable(QWidget):
         self.entert.setFixedWidth(130)
 
         self.enterb = QPushButton("Enter")
+        self.enterb.clicked.connect(self.tableDrop)
 
         layout.addWidget(self.enterl)
         layout.addWidget(self.entert)
@@ -306,18 +317,31 @@ class DropTable(QWidget):
         self.setFixedHeight(105)
         self.setFixedWidth(200)
 
+    def tableDrop(self):
+        try:
+            mydb = Connect.getConnection(Login.usern, Login.passw)
+            myc = mydb.cursor()
+
+            myc.execute("DROP TABLE " + self.entert.text())
+            self.close()
+            SelectDatabase.openWindow(self)
+        except Error as err:
+            labele = QLabel(str(err))
+            labele.setStyleSheet("color: red;")
+            self.layout.addWidget(labele, 2, 0)
+            self.setFixedHeight(130)
+
 class ViewTable(QWidget):
-    def __init__(self, usern, passw):
+    def __init__(self):
         super().__init__()
-        self.usern = usern
-        self.passw = passw
+
         self.resize(600, 600)
         self.setFixedHeight(500)
         self.setFixedWidth(300)
-        self.setWindowTitle("MDC")
+        self.setWindowTitle(ViewTable.getTable.text + " Table View")
 
         self.Body = QGridLayout()
-        self.labelp = QLabel("Hello "+ (self.usern.text()).upper())
+        self.labelp = QLabel("Hello "+ (Login.usern).upper())
         self.Body.addWidget(self.labelp, 0, 0)
 
         self.dSelection = QVBoxLayout()
@@ -326,47 +350,42 @@ class ViewTable(QWidget):
     
 
         self.table = QTableView()
-
-        data = [
-            [4, 9, 2],
-            [1, 0, 0],
-            [3, 5, 0],
-            [3, 3, 2],
-            [7, 8, 9],
-        ]
+        data = [list(i) for i in ViewTable.listData.query]
         self.model = TableModel(data)
         self.table.setModel(self.model)
 
         self.Body.addWidget(self.table, 1, 0)
+
     def getTable(text):
         ViewTable.getTable.text = text
 
     def listData(self):
-        mydb = Connect.getConnection(self.usern.text(), self.passw.text())
+        mydb = Connect.getConnection(Login.usern, Login.passw)
         myc = mydb.cursor()
         myc.execute("USE "+ SelectTable.getDatabase.text)
         myc.execute("SELECT * FROM " + ViewTable.getTable.text)
         ViewTable.listData.tables = len(myc.description)
-        field_names = [i[0] for i in myc.description]
-        print(field_names)
+        ViewTable.listData.col_names = [i[0] for i in myc.description]
+        ViewTable.listData.query = myc.fetchall()
 
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):
         super(TableModel, self).__init__()
         self._data = data
-
     def data(self, index, role):
         if role == Qt.ItemDataRole.DisplayRole:
-            # See below for the nested-list data structure.
-            # .row() indexes into the outer list,
-            # .column() indexes into the sub-list
             return self._data[index.row()][index.column()]
 
     def rowCount(self, index):
         return len(self._data)
 
     def columnCount(self, index):
-        return ViewTable.listData.tables
+        return len(ViewTable.listData.col_names)
+    
+    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+        if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
+            return ViewTable.listData.col_names[section]
+        return super().headerData(section, orientation, role)
 
 
 app = QApplication(sys.argv)

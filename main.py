@@ -1,6 +1,6 @@
 import sys
 import mysql.connector
-from PyQt6 import QtCore
+from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QTableView, QDialog, QApplication, QMainWindow, QPushButton,QVBoxLayout,QHBoxLayout, QGridLayout, QLabel, QWidget, QLineEdit, QFrame
 from root import Error, Connect
@@ -74,26 +74,36 @@ class   SelectDatabase(QWidget):
         self.setFixedWidth(300)
         self.setWindowTitle("MDC")
 
-        self.Body = QGridLayout()
-        self.labelp = QLabel("Hello "+ (Login.usern).upper())
-        self.Body.addWidget(self.labelp, 0, 0)
+        self.body = QGridLayout()
+        self.header = QHBoxLayout()
+        
+        self.labelp = QLabel("Currently Signed In As: "+ (Login.usern).upper())
+        self.backb = QPushButton()
+        self.backb.setIcon(QtGui.QIcon('340.png'))
+        self.backb.clicked.connect(self.back)
+        self.backb.setFixedWidth(40)
+        
+        self.header.addWidget(self.labelp)
+        self.header.addWidget(self.backb)
+        
 
         self.created = QPushButton("Create Database")
-        self.Body.addWidget(self.created, 1, 0)
+        self.body.addWidget(self.created, 1, 0)
         self.created.clicked.connect(self.cDatabase)
 
         self.deleted = QPushButton("Delete Database")
-        self.Body.addWidget(self.deleted, 1, 1)
+        self.body.addWidget(self.deleted, 1, 1)
         self.deleted.clicked.connect(self.dDatabase)
 
         self.selected = QLabel("Select Database:")
-        self.Body.addWidget(self.selected, 2, 0)
+        self.body.addWidget(self.selected, 2, 0)
 
-        self.dSelection = QVBoxLayout()
         SelectDatabase.listDatabase(self)
 
-
-        self.setLayout(self.Body)
+        self.layout = QVBoxLayout()
+        self.layout.addLayout(self.header)
+        self.layout.addLayout(self.body)
+        self.setLayout(self.layout)
 
     def openWindow(self):
         self.win = SelectDatabase()
@@ -111,7 +121,7 @@ class   SelectDatabase(QWidget):
             text = self.databases.text()
             self.databases.clicked.connect(lambda c, text=text : SelectTable.getDatabase(text))
             self.databases.clicked.connect(self.showTables)
-            self.Body.addWidget(self.databases, x, 0)
+            self.body.addWidget(self.databases, x, 0)
             x+=1
             self.databases.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
                                         "QPushButton:hover { background-color: #818181 }")
@@ -128,6 +138,11 @@ class   SelectDatabase(QWidget):
     def showTables(self):
         self.close()
         self.w = SelectTable()
+        self.w.show()
+
+    def back(self):
+        self.close()
+        self.w = Login()
         self.w.show()
 
 class CreateDatabase(QDialog):
@@ -217,24 +232,36 @@ class SelectTable(QWidget):
         self.setFixedWidth(300)
         self.setWindowTitle("MDC")
 
-        self.Body = QGridLayout()
-        self.labelp = QLabel("Hello "+ (Login.usern).upper())
-        self.Body.addWidget(self.labelp, 0, 0)
+        self.body = QGridLayout()
+        self.header = QHBoxLayout()
+        
+        self.labelp = QLabel("Currently Signed In As: "+ (Login.usern).upper())
+        self.backb = QPushButton()
+        self.backb.setIcon(QtGui.QIcon('340.png'))
+        self.backb.clicked.connect(self.back)
+        self.backb.setFixedWidth(40)
+        
+        self.header.addWidget(self.labelp)
+        self.header.addWidget(self.backb)
 
         self.createt = QPushButton("Create Table")
-        self.Body.addWidget(self.createt, 1, 0)
+        self.body.addWidget(self.createt, 1, 0)
         self.createt.clicked.connect(self.cTable)
 
         self.deletet = QPushButton("Delete Table")
-        self.Body.addWidget(self.deletet, 1, 1)
+        self.body.addWidget(self.deletet, 1, 1)
         self.deletet.clicked.connect(self.dTable)
 
         self.selected = QLabel("Select Table:")
-        self.Body.addWidget(self.selected, 2, 0)
+        self.body.addWidget(self.selected, 2, 0)
 
-        self.dSelection = QVBoxLayout()
-        self.setLayout(self.Body)
         SelectTable.listTable(self)
+        
+        self.layout = QVBoxLayout()
+        self.layout.addLayout(self.header)
+        self.layout.addLayout(self.body)
+        self.setLayout(self.layout)
+        
     
     def getDatabase(text):
         SelectTable.getDatabase.text = text
@@ -251,7 +278,7 @@ class SelectTable(QWidget):
             text = self.tables.text()
             self.tables.clicked.connect(lambda c, text=text : ViewTable.getTable(text))
             self.tables.clicked.connect(self.showData)
-            self.Body.addWidget(self.tables, x, 0)
+            self.body.addWidget(self.tables, x, 0)
             x+=1
             self.tables.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
                                         "QPushButton:hover { background-color: #818181 }")
@@ -269,6 +296,11 @@ class SelectTable(QWidget):
     def dTable(self):
         self.close()
         self.w = DropTable()
+        self.w.show()
+    
+    def back(self):
+        self.close()
+        self.w = Login()
         self.w.show()
     
 
@@ -340,21 +372,19 @@ class ViewTable(QWidget):
         self.setFixedWidth(300)
         self.setWindowTitle(ViewTable.getTable.text + " Table View")
 
-        self.Body = QGridLayout()
+        self.body = QGridLayout()
         self.labelp = QLabel("Hello "+ (Login.usern).upper())
-        self.Body.addWidget(self.labelp, 0, 0)
+        self.body.addWidget(self.labelp, 0, 0)
 
-        self.dSelection = QVBoxLayout()
-        self.setLayout(self.Body)
+        self.setLayout(self.body)
         ViewTable.listData(self)
     
-
         self.table = QTableView()
         data = [list(i) for i in ViewTable.listData.query]
         self.model = TableModel(data)
         self.table.setModel(self.model)
 
-        self.Body.addWidget(self.table, 1, 0)
+        self.body.addWidget(self.table, 1, 0)
 
     def getTable(text):
         ViewTable.getTable.text = text

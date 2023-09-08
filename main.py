@@ -70,21 +70,21 @@ class   SelectDatabase(QWidget):
         super().__init__()
 
         self.resize(600, 600)
-        self.setFixedHeight(500)
-        self.setFixedWidth(300)
+        self.setFixedHeight(600)
+        self.setFixedWidth(400)
         self.setWindowTitle("MDC")
 
         self.body = QGridLayout()
-        self.header = QHBoxLayout()
+        self.header = QGridLayout()
         
-        self.labelp = QLabel("Currently Signed In As: "+ (Login.usern).upper())
+        self.labelp = QLabel("Signed In As: "+ (Login.usern).upper())
         self.backb = QPushButton()
         self.backb.setIcon(QtGui.QIcon('340.png'))
         self.backb.clicked.connect(self.back)
         self.backb.setFixedWidth(40)
-        
-        self.header.addWidget(self.labelp)
-        self.header.addWidget(self.backb)
+
+        self.header.addWidget(self.backb, 0, 0)
+        self.header.addWidget(self.labelp, 0, 2, alignment=Qt.AlignmentFlag.AlignRight)
         
 
         self.created = QPushButton("Create Database")
@@ -125,6 +125,7 @@ class   SelectDatabase(QWidget):
             x+=1
             self.databases.setStyleSheet("QPushButton { background-color: white; color: black; border-radius: 0px; border-width: 0px;}"
                                         "QPushButton:hover { background-color: #818181 }")
+    
     def cDatabase(self):
         self.close()
         self.w = CreateDatabase()
@@ -150,9 +151,17 @@ class CreateDatabase(QDialog):
         super().__init__()
 
         self.setWindowTitle("Create Database")
-        self.layout = QGridLayout()
+        self.layout = QVBoxLayout()
+        self.body = QGridLayout()
+        self.header = QHBoxLayout()
         self.enterl = QLabel("Enter Database Name To Create")
         
+        self.backb = QPushButton()
+        self.backb.setIcon(QtGui.QIcon('340.png'))
+        self.backb.clicked.connect(self.back)
+        self.backb.setFixedWidth(40)
+
+        self.header.addWidget(self.backb, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.entert = QLineEdit()
         self.entert.setFixedWidth(150)
@@ -160,13 +169,17 @@ class CreateDatabase(QDialog):
         self.enterb = QPushButton("Enter")
         self.enterb.clicked.connect(self.databaseCreate)
 
-        self.layout.addWidget(self.enterl, 0, 0)
-        self.layout.addWidget(self.entert, 1, 0)
-        self.layout.addWidget(self.enterb, 3, 0)
+        self.body.addWidget(self.enterl, 0, 0)
+        self.body.addWidget(self.entert, 1, 0)
+        self.body.addWidget(self.enterb, 3, 0)
+
+        self.layout.addLayout(self.header)
+        self.layout.addLayout(self.body)
+
         self.setLayout(self.layout)
 
         self.enterl.setFixedWidth(150)
-        self.setFixedHeight(105)
+        self.setFixedHeight(140)
         self.setFixedWidth(200)
 
         
@@ -184,65 +197,86 @@ class CreateDatabase(QDialog):
             self.layout.addWidget(labele, 2, 0)
             self.setFixedHeight(130)
 
+    def back(self):
+        self.close()
+        self.w = SelectDatabase()
+        self.w.show()
+
 
 class DeleteDatabase(QDialog):
     def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Delete Database")
-        self.layout = QGridLayout()
+        self.layout = QVBoxLayout()
+        self.body = QGridLayout()
+        self.header = QHBoxLayout()
         self.enterl = QLabel("Enter Database Name")
-        
 
+        self.backb = QPushButton()
+        self.backb.setIcon(QtGui.QIcon('340.png'))
+        self.backb.clicked.connect(self.back)
+        self.backb.setFixedWidth(40)
+        self.header.addWidget(self.backb, alignment=Qt.AlignmentFlag.AlignLeft)
+        
         self.entert = QLineEdit()
         self.entert.setFixedWidth(150)
 
         self.enterb = QPushButton("Enter")
         self.enterb.clicked.connect(self.databaseDelete)
 
-        self.layout.addWidget(self.enterl, 0, 0)
-        self.layout.addWidget(self.entert, 1, 0)
-        self.layout.addWidget(self.enterb, 3, 0)
+        self.body.addWidget(self.enterl, 0, 0)
+        self.body.addWidget(self.entert, 1, 0)
+        self.body.addWidget(self.enterb, 3, 0)
+
+        self.layout.addLayout(self.header)
+        self.layout.addLayout(self.body)
         self.setLayout(self.layout)
 
         self.enterl.setFixedWidth(150)
-        self.setFixedHeight(105)
+        self.setFixedHeight(140)
         self.setFixedWidth(200)
 
     def databaseDelete(self):
         try:
-                mydb = Connect.getConnection(Login.usern, Login.usern)
-                myc = mydb.cursor()
+            mydb = Connect.getConnection(Login.usern, Login.usern)
+            myc = mydb.cursor()
 
-                myc.execute("DROP DATABASE " + self.entert.text())
-                self.close()
-                SelectDatabase.openWindow(self)
+            myc.execute("DROP DATABASE " + self.entert.text())
+            self.close()
+            SelectDatabase.openWindow(self)
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
             self.layout.addWidget(labele, 2, 0)
             self.setFixedHeight(130)
+    
+    def back(self):
+        self.close()
+        self.w = SelectDatabase()
+        self.w.show()
+
 
 class SelectTable(QWidget):
     def __init__(self):
         super().__init__()
 
         self.resize(600, 600)
-        self.setFixedHeight(500)
-        self.setFixedWidth(300)
+        self.setFixedHeight(600)
+        self.setFixedWidth(400)
         self.setWindowTitle("MDC")
 
         self.body = QGridLayout()
-        self.header = QHBoxLayout()
+        self.header = QGridLayout()
         
-        self.labelp = QLabel("Currently Signed In As: "+ (Login.usern).upper())
+        self.labelp = QLabel("Signed In As: "+ (Login.usern).upper())
         self.backb = QPushButton()
         self.backb.setIcon(QtGui.QIcon('340.png'))
         self.backb.clicked.connect(self.back)
         self.backb.setFixedWidth(40)
         
-        self.header.addWidget(self.labelp)
-        self.header.addWidget(self.backb)
+        self.header.addWidget(self.backb, 0, 0)
+        self.header.addWidget(self.labelp, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
 
         self.createt = QPushButton("Create Table")
         self.body.addWidget(self.createt, 1, 0)
@@ -307,8 +341,7 @@ class SelectTable(QWidget):
 class CreateTable(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Create Table")
-        layout = QGridLayout()
+        self.layout = QGridLayout()
         self.enterl = QLabel(" Enter Table Name")
         
 
@@ -316,23 +349,50 @@ class CreateTable(QWidget):
         self.entert.setFixedWidth(130)
 
         self.enterb = QPushButton("Enter")
+        self.enterb.clicked.connect(self.update)
         
-        layout.addWidget(self.enterl)
-        layout.addWidget(self.entert)
-        layout.addWidget(self.enterb)
-        self.setLayout(layout)
+        self.layout.addWidget(self.enterl)
+        self.layout.addWidget(self.entert)
+        self.layout.addWidget(self.enterb)
+        self.setLayout(self.layout)
 
         self.enterl.setFixedWidth(130)
-        self.setFixedHeight(105)
-        self.setFixedWidth(200)
+        self.setFixedHeight(200)
+        self.setFixedWidth(300)
+
+    def update(self):
+        self.enterb = QPushButton("Enter")
+        self.layout.addWidget(self.enterb)
+        self.repaint()
+    
+    def cTable(self):
+        try:
+            mydb = Connect.getConnection(Login.usern, Login.usern)
+            myc = mydb.cursor()
+
+            myc.execute("CREATE TABLE " + self.entert.text()+"("+ + ")")
+            self.close()
+            SelectDatabase.openWindow(self)
+        except Error as err:
+            labele = QLabel(str(err))
+            labele.setStyleSheet("color: red;")
+            self.layout.addWidget(labele, 2, 0)
+            self.setFixedHeight(130)
 
 class DropTable(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Drop Table")
-        layout = QGridLayout()
+        self.layout = QVBoxLayout()
+        self.body = QGridLayout()
+        self.header = QHBoxLayout()
         self.enterl = QLabel(" Enter Table Name")
         
+        self.backb = QPushButton()
+        self.backb.setIcon(QtGui.QIcon('340.png'))
+        self.backb.clicked.connect(self.back)
+        self.backb.setFixedWidth(40)
+        self.header.addWidget(self.backb, alignment=Qt.AlignmentFlag.AlignLeft)
 
         self.entert = QLineEdit()
         self.entert.setFixedWidth(130)
@@ -340,13 +400,16 @@ class DropTable(QWidget):
         self.enterb = QPushButton("Enter")
         self.enterb.clicked.connect(self.tableDrop)
 
-        layout.addWidget(self.enterl)
-        layout.addWidget(self.entert)
-        layout.addWidget(self.enterb)
-        self.setLayout(layout)
+        self.body.addWidget(self.enterl, 0, 0)
+        self.body.addWidget(self.entert, 1, 0)
+        self.body.addWidget(self.enterb, 3, 0)
+
+        self.layout.addLayout(self.header)
+        self.layout.addLayout(self.body)
+        self.setLayout(self.layout)
 
         self.enterl.setFixedWidth(130)
-        self.setFixedHeight(105)
+        self.setFixedHeight(140)
         self.setFixedWidth(200)
 
     def tableDrop(self):
@@ -362,21 +425,35 @@ class DropTable(QWidget):
             labele.setStyleSheet("color: red;")
             self.layout.addWidget(labele, 2, 0)
             self.setFixedHeight(130)
+    
+    def back(self):
+        self.close()
+        self.w = SelectTable()
+        self.w.show()
 
 class ViewTable(QWidget):
     def __init__(self):
         super().__init__()
 
         self.resize(600, 600)
-        self.setFixedHeight(500)
-        self.setFixedWidth(300)
+        self.setFixedHeight(600)
+        self.setFixedWidth(700)
         self.setWindowTitle(ViewTable.getTable.text + " Table View")
 
+        self.layout = QVBoxLayout()
         self.body = QGridLayout()
-        self.labelp = QLabel("Hello "+ (Login.usern).upper())
-        self.body.addWidget(self.labelp, 0, 0)
+        self.header = QGridLayout()
+        self.labelp = QLabel("Signed In As: "+ (Login.usern).upper())
+        self.backb = QPushButton()
+        self.backb.setIcon(QtGui.QIcon('340.png'))
+        self.backb.clicked.connect(self.back)
+        self.backb.setFixedWidth(40)
+        self.header.addWidget(self.backb, 0, 0)
+        self.header.addWidget(self.labelp, 0, 1, alignment=Qt.AlignmentFlag.AlignRight)
 
-        self.setLayout(self.body)
+        self.layout.addLayout(self.header)
+        self.layout.addLayout(self.body)
+        self.setLayout(self.layout)
         ViewTable.listData(self)
     
         self.table = QTableView()
@@ -397,6 +474,11 @@ class ViewTable(QWidget):
         ViewTable.listData.tables = len(myc.description)
         ViewTable.listData.col_names = [i[0] for i in myc.description]
         ViewTable.listData.query = myc.fetchall()
+
+    def back(self):
+        self.close()
+        self.w = SelectTable()
+        self.w.show()
 
 class TableModel(QtCore.QAbstractTableModel):
     def __init__(self, data):

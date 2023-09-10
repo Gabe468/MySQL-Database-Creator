@@ -62,8 +62,6 @@ class Login(QMainWindow):
             labele.setStyleSheet("color: red;")
             self.layout.addWidget(labele, 3, 0)
             self.setFixedHeight(150)
-
-
     
 class   SelectDatabase(QWidget):
     def __init__(self):
@@ -185,23 +183,22 @@ class CreateDatabase(QDialog):
         
     def databaseCreate(self):
         try:
-                mydb = Connect.getConnection(Login.usern, Login.usern)
-                myc = mydb.cursor()
+            mydb = Connect.getConnection(Login.usern, Login.usern)
+            myc = mydb.cursor()
 
-                myc.execute("CREATE DATABASE " + self.entert.text())
-                self.close()
-                SelectDatabase.openWindow(self)
+            myc.execute("CREATE DATABASE " + self.entert.text())
+            self.close()
+            SelectDatabase.openWindow(self)
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
-            self.layout.addWidget(labele, 2, 0)
+            self.body.addWidget(labele, 2, 0)
             self.setFixedHeight(130)
 
     def back(self):
         self.close()
         self.w = SelectDatabase()
         self.w.show()
-
 
 class DeleteDatabase(QDialog):
     def __init__(self):
@@ -248,14 +245,13 @@ class DeleteDatabase(QDialog):
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
-            self.layout.addWidget(labele, 2, 0)
+            self.body.addWidget(labele, 2, 0)
             self.setFixedHeight(130)
     
     def back(self):
         self.close()
         self.w = SelectDatabase()
         self.w.show()
-
 
 class SelectTable(QWidget):
     def __init__(self):
@@ -297,6 +293,10 @@ class SelectTable(QWidget):
         self.setLayout(self.layout)
         
     
+    def openWindow(self):
+        self.win = SelectTable()
+        self.win.show()
+        
     def getDatabase(text):
         SelectTable.getDatabase.text = text
 
@@ -337,47 +337,128 @@ class SelectTable(QWidget):
         self.w = Login()
         self.w.show()
     
-
 class CreateTable(QWidget):
     def __init__(self):
         super().__init__()
-        self.layout = QGridLayout()
+        self.layout = QVBoxLayout()
+        self.buttons = QHBoxLayout()
+        self.header = QHBoxLayout()
         self.enterl = QLabel(" Enter Table Name")
         
 
         self.entert = QLineEdit()
-        self.entert.setFixedWidth(130)
 
         self.enterb = QPushButton("Enter")
         self.enterb.clicked.connect(self.update)
         
-        self.layout.addWidget(self.enterl)
+        self.backb = QPushButton()
+        self.backb.setIcon(QtGui.QIcon('340.png'))
+        self.backb.clicked.connect(self.back)
+        self.backb.setFixedWidth(40)
+        
+        self.pkb = QPushButton("PK")
+        self.varb = QPushButton("VarChar")
+        self.dateb = QPushButton("Date")
+        self.intb = QPushButton("Int")
+        
+        self.header.addWidget(self.backb, alignment=Qt.AlignmentFlag.AlignRight)
+        self.layout.addLayout(self.header)
+        self.layout.addWidget(self.enterl, alignment=Qt.AlignmentFlag.AlignCenter)
         self.layout.addWidget(self.entert)
+        self.buttons.addWidget(self.pkb)
+        self.buttons.addWidget(self.varb)
+        self.buttons.addWidget(self.dateb)
+        self.buttons.addWidget(self.intb)
+        
+        self.pkb.clicked.connect(self.pkbTable)
+        self.dateb.clicked.connect(self.dateTable)
+        self.varb.clicked.connect(self.varTable)
+        self.intb.clicked.connect(self.intTable)
+        self.enterb.clicked.connect(self.cTable)
+        self.varLayout = QGridLayout()
+        
+        self.layout.addLayout(self.buttons)
+        self.layout.addLayout(self.varLayout)
         self.layout.addWidget(self.enterb)
         self.setLayout(self.layout)
 
-        self.enterl.setFixedWidth(130)
-        self.setFixedHeight(200)
+        CreateTable.height = 200
+        self.setFixedHeight(CreateTable.height)
         self.setFixedWidth(300)
-
-    def update(self):
-        self.enterb = QPushButton("Enter")
-        self.layout.addWidget(self.enterb)
-        self.repaint()
+        CreateTable.text = []
     
     def cTable(self):
+        
+        try:
+            CreateTable.text.append(self.varText.text()+ " VARCHAR(255)")
+        except:
+            pass
+        
+        try:
+            CreateTable.text.append(self.dateText.text()+ " DATE")
+        except:
+            pass
+        
+        try:
+            CreateTable.text.append(self.intText.text() + " int")
+        except:
+            pass
+        
         try:
             mydb = Connect.getConnection(Login.usern, Login.usern)
             myc = mydb.cursor()
-
-            myc.execute("CREATE TABLE " + self.entert.text()+"("+ + ")")
+            print("CREATE TABLE " + SelectTable.getDatabase.text + "."+ self.entert.text() + " (" + ', '.join([str(var) for var in CreateTable.text]) + ")")
+            myc.execute("CREATE TABLE " + SelectTable.getDatabase.text + "."+ self.entert.text() + " (" + ', '.join([str(var) for var in CreateTable.text]) + ")")
             self.close()
             SelectDatabase.openWindow(self)
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
-            self.layout.addWidget(labele, 2, 0)
-            self.setFixedHeight(130)
+            self.layout.addWidget(labele)
+            CreateTable.height += 50
+            self.setFixedHeight(CreateTable.height)
+        
+
+    def pkbTable(self):
+        self.pkbLabel = QLabel("PKB")
+        self.varLayout.addWidget(self.pkbLabel)
+        CreateTable.height += 50
+        self.setFixedHeight(CreateTable.height)
+        CreateTable.text.append("id INT AUTO_INCREMENT PRIMARY KEY")
+        self.update()
+    
+    def varTable(self):
+        self.varLabel = QLabel("VARCHAR")
+        self.varText = QLineEdit()
+        self.varLayout.addWidget(self.varLabel)
+        self.varLayout.addWidget(self.varText)
+        CreateTable.height += 50
+        self.setFixedHeight(CreateTable.height)
+        self.update()
+        
+    def dateTable(self):
+        self.dateLabel = QLabel("DATE")
+        self.dateText = QLineEdit()
+        self.varLayout.addWidget(self.dateLabel)
+        self.varLayout.addWidget(self.dateText)
+        CreateTable.height += 50
+        self.setFixedHeight(CreateTable.height)
+        self.update()
+        
+    def intTable(self):
+        self.intLabel = QLabel("VARCHAR")
+        self.intText = QLineEdit()
+        self.varLayout.addWidget(self.intLabel)
+        self.varLayout.addWidget(self.intText)
+        CreateTable.height += 50
+        self.setFixedHeight(CreateTable.height)
+        self.update()
+        
+    
+    def back(self):
+        self.close()
+        self.w = SelectTable()
+        self.w.show()
 
 class DropTable(QWidget):
     def __init__(self):
@@ -417,13 +498,13 @@ class DropTable(QWidget):
             mydb = Connect.getConnection(Login.usern, Login.passw)
             myc = mydb.cursor()
 
-            myc.execute("DROP TABLE " + self.entert.text())
+            myc.execute("DROP TABLE " + SelectTable.getDatabase.text + "." + self.entert.text())
             self.close()
-            SelectDatabase.openWindow(self)
+            SelectTable.openWindow(self)
         except Error as err:
             labele = QLabel(str(err))
             labele.setStyleSheet("color: red;")
-            self.layout.addWidget(labele, 2, 0)
+            self.body.addWidget(labele, 2, 0)
             self.setFixedHeight(130)
     
     def back(self):
@@ -498,7 +579,6 @@ class TableModel(QtCore.QAbstractTableModel):
         if orientation == Qt.Orientation.Horizontal and role == Qt.ItemDataRole.DisplayRole:
             return ViewTable.listData.col_names[section]
         return super().headerData(section, orientation, role)
-
 
 app = QApplication(sys.argv)
 

@@ -1,1 +1,0 @@
-Import csv to tables and view data **LAST STEP

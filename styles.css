@@ -22,3 +22,7 @@ QLineEdit {
 QLabel{
     font-size: 16px;
 }
+QHeaderView::section
+{
+  background-color:#818181
+}
